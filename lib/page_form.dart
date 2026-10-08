@@ -2,12 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// Page na nagtitipon ng biodata at nagsa-save nito sa Firestore.
 class FormPage extends StatefulWidget {
-  /// Gumagawa ng biodata page.
   const FormPage({super.key});
 
-  /// Gumagawa ng state para sa mga input at form actions.
   @override
   State<FormPage> createState() => _FormPageState();
 }
@@ -31,13 +28,12 @@ class _FormPageState extends State<FormPage> {
   DateTime? _selectedBirthdate;
   bool _isSaving = false;
 
-  /// Sinusuri ang biodata at sine-save ito sa `students` collection sa Firestore.
   Future<void> saveData() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isSaving = true);
     try {
-      await _firestore.collection('students').add({
+      await _firestore.collection('ACTIVITY3').add({
         'name': _nameController.text.trim(),
         'nickname': _nicknameController.text.trim(),
         'age': int.parse(_ageController.text.trim()),
@@ -80,15 +76,14 @@ class _FormPageState extends State<FormPage> {
       });
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Hindi na-save ang biodata: $error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to save biodata: $error')));
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
   }
 
-  /// Gumagawa ng heading para malinaw ang mga pangkat ng biodata fields.
   Widget _sectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(top: 24, bottom: 12),
@@ -105,7 +100,6 @@ class _FormPageState extends State<FormPage> {
     );
   }
 
-  /// Gumagawa ng text field na may icon at validation para sa kinakailangang sagot.
   Widget _textField({
     required TextEditingController controller,
     required String label,
@@ -127,7 +121,7 @@ class _FormPageState extends State<FormPage> {
         ),
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
-            return 'Pakilagay ang $label';
+            return 'Please enter $label';
           }
           return extraValidator?.call(value);
         },
@@ -135,10 +129,9 @@ class _FormPageState extends State<FormPage> {
     );
   }
 
-  /// Nagpapakita ng date picker at nagva-validate ng napiling birthday.
   Widget _birthdateField() {
     return FormField<DateTime>(
-      validator: (value) => value == null ? 'Pumili ng birthdate' : null,
+      validator: (value) => value == null ? 'Please select a birthdate' : null,
       builder: (field) {
         final date = field.value;
         return Padding(
@@ -177,7 +170,6 @@ class _FormPageState extends State<FormPage> {
     );
   }
 
-  /// Isinasara ang lahat ng text controllers kapag inalis na ang page.
   @override
   void dispose() {
     _nameController.dispose();
@@ -194,7 +186,6 @@ class _FormPageState extends State<FormPage> {
     super.dispose();
   }
 
-  /// Binubuo ang scrollable biodata form na nakaayos ayon sa screenshot.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -237,7 +228,7 @@ class _FormPageState extends State<FormPage> {
                   extraValidator: (value) {
                     final age = int.tryParse(value!.trim());
                     if (age == null || age < 1 || age > 150) {
-                      return 'Maglagay ng valid na edad';
+                      return 'Please enter a valid age';
                     }
                     return null;
                   },
@@ -263,7 +254,7 @@ class _FormPageState extends State<FormPage> {
                     onChanged: (value) =>
                         setState(() => _selectedGender = value),
                     validator: (value) =>
-                        value == null ? 'Pumili ng gender' : null,
+                        value == null ? 'Please select a gender' : null,
                   ),
                 ),
                 _birthdateField(),
@@ -294,7 +285,7 @@ class _FormPageState extends State<FormPage> {
                   extraValidator: (value) {
                     if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
                         .hasMatch(value!.trim())) {
-                      return 'Maglagay ng valid na email address';
+                      return 'Please enter a valid email address';
                     }
                     return null;
                   },
@@ -324,7 +315,7 @@ class _FormPageState extends State<FormPage> {
                 const SizedBox(height: 8),
                 SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton.icon(
+                  child: TextButton.icon(
                     onPressed: _isSaving ? null : saveData,
                     icon: _isSaving
                         ? const SizedBox(
@@ -333,7 +324,7 @@ class _FormPageState extends State<FormPage> {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.save),
-                    label: Text(_isSaving ? 'Sine-save...' : 'Save Biodata'),
+                    label: Text(_isSaving ? 'Saving...' : 'Save Biodata'),
                   ),
                 ),
               ],
@@ -344,3 +335,4 @@ class _FormPageState extends State<FormPage> {
     );
   }
 }
+// pass
